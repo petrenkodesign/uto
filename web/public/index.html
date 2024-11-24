@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Control Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { margin-bottom: 20px; }
+        button { margin: 5px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Flight Control Dashboard</h1>
+    <div class="status">
+        <h3>Status:</h3>
+        <p id="latitude">Latitude: </p>
+        <p id="longitude">Longitude: </p>
+        <p id="altitude">Altitude: </p>
+        <p id="wind">Wind: </p>
+    </div>
+    <div>
+        <h3>Motor Control:</h3>
+        <button onclick="setMotor('left', 1)">Left Motor: ON</button>
+        <button onclick="setMotor('left', 0)">Left Motor: OFF</button>
+        <button onclick="setMotor('right', 1)">Right Motor: ON</button>
+        <button onclick="setMotor('right', 0)">Right Motor: OFF</button>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Оновлення статусу в реальному часі
+        socket.on('update', (status) => {
+            document.getElementById('latitude').textContent = `Latitude: ${status.latitude}`;
+            document.getElementById('longitude').textContent = `Longitude: ${status.longitude}`;
+            document.getElementById('altitude').textContent = `Altitude: ${status.altitude} m`;
+            document.getElementById('wind').textContent = `Wind: ${status.windSpeed} m/s, ${status.windDirection}°`;
+        });
+
+        // Відправлення команд двигунам
+        function setMotor(motor, value) {
+            fetch('/api/control', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ motor, value })
+            }).then(res => res.json())
+              .then(data => console.log(data));
+        }
+    </script>
+</body>
+</html>
+
